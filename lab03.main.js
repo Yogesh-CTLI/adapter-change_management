@@ -1,6 +1,6 @@
 // Update this constant with your ServiceNow credentials
 const options = {
-  url: 'https://dev77191.service-now.com/nav_to.do?uri=%2Fhome.do%3F',
+  url: 'https://dev77191.service-now.com/',
   username: 'admin',
   password: '18Oct@018'
 };
@@ -66,30 +66,53 @@ function isHibernating(response) {
 }
 
 
-/**
- * @function processRequestResults
- * @description Inspect ServiceNow API response for an error, bad response code, or
- *   a hibernating instance. If any of those conditions are detected, return an error.
- *   Else return the API's response.
- *
- * @param {error} error - The error argument passed by the request function in its callback.
- * @param {object} response - The response argument passed by the request function in its callback.
- * @param {string} body - The HTML body argument passed by the request function in its callback.
- * @param {iapCallback} callback - Callback a function.
- * @param {(object|string)} callback.data - The API's response. Will be an object if sunnyday path.
- *   Will be HTML text if hibernating instance.
- * @param {error} callback.error - The error property of callback.
- */
-function processRequestResults(error, response, body, callback) {
-  /**
-   * You must build the contents of this function.
-   * Study your package and note which parts of the get()
-   * and post() functions evaluate and respond to data
-   * and/or errors the request() function returns.
-   * This function must not check for a hibernating instance;
-   * it must call function isHibernating.
-   */
-}
+
+    /**
+    * @function processRequestResults
+    * @description Inspect ServiceNow API response for an error, bad response code, or
+    * a hibernating instance. If any of those conditions are detected, return an error.
+    * Else return the API's response.
+    *
+    * @param {error} error - The error argument passed by the request function in its callback.
+    * @param {object} response - The response argument passed by the request function in its callback.
+    * @param {string} body - The HTML body argument passed by the request function in its callback.
+    * @param {iapCallback} callback - Callback a function.
+    * @param {(object|string)} callback.data - The API's response. Will be an object if sunnyday path.
+    * Will be HTML text if hibernating instance.
+    * @param {error} callback.error - The error property of callback.
+    */
+    function processRequestResults(error, response, body, callback) {
+        /**
+        * You must build the contents of this function.
+        * Study your package and note which parts of the get()
+        * and post() functions evaluate and respond to data
+        * and/or errors the request() function returns.
+        * This function must not check for a hibernating instance;
+        * it must call function isHibernating.
+        */
+
+        /**
+        * Process ServiceNow error, response and body.
+        * Check error and response code to make sure
+        * response is good.
+        */
+        let callbackError = null;
+
+        if (error) {
+        console.error('Error present.');
+        callbackError = error;
+        } else if (!validResponseRegex.test(response.statusCode)) {
+        console.error('Bad response code.');
+        callbackError = response;
+        } else if (response.body.includes('Instance Hibernating page')) {
+        callbackError = 'Service Now instance is hibernating';
+        console.error(callbackError);
+        } else {
+        callbackData = response;
+        }
+        return callback(callbackData, callbackError);
+
+    } 
 
 
 /**
@@ -109,21 +132,30 @@ function processRequestResults(error, response, body, callback) {
  */
 function sendRequest(callOptions, callback) {
   // Initialize return arguments for callback
-  let uri;
-  if (callOptions.query)
-    uri = constructUri(callOptions.serviceNowTable, callOptions.query);
-  else
-    uri = constructUri(callOptions.serviceNowTable);
-  /**
-   * You must build the requestOptions object.
-   * This is not a simple copy/paste of the requestOptions object
-   * from the previous lab. There should be no
-   * hardcoded values.
-   */
-  const requestOptions = {};
-  request(requestOptions, (error, response, body) => {
-    processRequestResults(error, response, body, (processedResults, processedError) => callback(processedResults, processedError));
-  });
+        let uri;
+        if (callOptions.query)
+        uri = constructUri(callOptions.serviceNowTable, callOptions.query);
+        else
+        uri = constructUri(callOptions.serviceNowTable);
+        /**
+        * You must build the requestOptions object.
+        * This is not a simple copy/paste of the requestOptions object
+        * from the previous lab. There should be no
+        * hardcoded values.
+        */
+        const requestOptions = {
+            method: callOptions.method,
+            auth: {
+            user: options.username,
+            pass: options.password,
+            },
+            baseUrl: options.url,
+            uri: uri,
+            };
+
+        request(requestOptions, (error, response, body) => {
+        processRequestResults(error, response, body, (processedResults, processedError) => callback(processedResults, processedError));
+        });
 }
 
 
