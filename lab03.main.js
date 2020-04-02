@@ -30,7 +30,6 @@ const validResponseRegex = /(2\d\d)/;
  *   message in optional second argument to callback function.
  */
 
-
 /**
  * @function constructUri
  * @description Build and return the proper URI by appending an optionally passed
@@ -48,7 +47,6 @@ function constructUri(serviceNowTable, query = null) {
   }
   return uri;
 }
-
 
 /**
  * @function isHibernating
